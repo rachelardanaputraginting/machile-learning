@@ -8,7 +8,8 @@ def tampilkan_menu():
     print("3. Perkalian (*)") # Operasi perkalian
     print("4. Pembagian (/)") # Operasi pembagian
     print("5. Modulus (%)") # Operasi modulus
-    print("6. Keluar") # Operasi modulus
+    print("6. Pangkat(^)") # Operasi modulus
+    print("7. Keluar") # Operasi modulus
 
 # Fungsi untuk melakukan penjumlahan
 def tambah(a, b):
@@ -30,17 +31,31 @@ def modulus(a, b):
         return "Error: Modulus dengan nol tidak diperbolehkan!"
     return a % b # Mengambalikan hasil penjumlahan a + b
 
+def pangkat(a, b):
+    if b == 0:
+        return 1;
+    elif b > 0:
+        hasil = 1
+        for _ in range(b):
+            hasil *= a
+        return hasil
+    else:
+        hasil = 1
+        for _ in range(-b):
+            hasil *= a
+        return 1 / hasil
+
 # Program utama
 while True:
     tampilkan_menu()
 
     pilihan = input("Pilih operasi (1/2/3/4/5/6): ")
 
-    if pilihan == '6':
+    if pilihan == '7':
         print("Terimakasih telah menggunakan kalkulator ini!")
         break  # Keluar dari loop
     
-    if pilihan not in ['1', '2', '3', '4', '5']:
+    if pilihan not in ['1', '2', '3', '4', '5', '6']:
         print("Pilihan tidak valid. Silakan coba lagi.")
         continue  # Kembali ke awal loop
 
@@ -66,6 +81,9 @@ while True:
     elif pilihan == '5':
         hasil = modulus(angka1, angka2)
         print(f"Hasil: {angka1} % {angka2} = {hasil}")
+    elif pilihan == '6':
+        hasil = pangkat(angka1, int(angka2))
+        print(f"Hasil: {angka1} ^ {angka2} = {hasil}")
     
     print() 
 
