@@ -11,8 +11,8 @@ def tampilkan_menu():
 
 def hitung_statistik(df):
     sum_bp = 0
-    min_bp = float('inf')
-    max_bp = float('-inf')
+    min_bp = df.iloc[0]['BloodPressure']
+    max_bp = df.iloc[0]['BloodPressure']
     count = 0
     values = []
 
@@ -23,8 +23,10 @@ def hitung_statistik(df):
         values.append(bp)
         if bp < min_bp:
             min_bp = bp
+            print(f"Minimum", {i})
         if bp > max_bp:
             max_bp = bp
+            print(i)
 
     mean_bp = sum_bp / count
     values.sort()
@@ -138,7 +140,8 @@ for i in range(len(df)):
 
 # 17. Menampilkan statistik BloodPressure dengan menu
 print("\n▶️ Statistik BloodPressure:")
-stats = hitung_statistik(df)
+stats = hitung_statistik(df.head(10))
+
 
 while True:
     tampilkan_menu()
