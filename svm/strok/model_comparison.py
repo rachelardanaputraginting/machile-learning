@@ -21,6 +21,7 @@ except ImportError:
 # Model-model yang akan digunakan
 dt_model = None          # Decision Tree model
 svm_model = None         # SVM model
+dt_model_optimized = None # Decision Tree model yang dioptimalkan
 
 # Data yang akan digunakan
 X_train = X_test = y_train = y_test = None
@@ -33,7 +34,7 @@ model_results = {}
 # Daftar fitur yang akan digunakan
 feature_cols = ['gender', 'age', 'hypertension', 'heart_disease', 'ever_married',
                 'work_type', 'Residence_type', 'avg_glucose_level', 'bmi', 'smoking_status']
-
+ 
 # === Fungsi untuk memuat dan memproses dataset ===
 def load_and_preprocess_data():
     """Memuat dan memproses dataset stroke"""
@@ -88,20 +89,41 @@ def train_decision_tree():
     """Melatih model Decision Tree dengan berbagai parameter"""
     global dt_model
     
-    print("=== MELATIH MODEL DECISION TREE ===")
+    print("=== MELATIH MODEL DECISION TREE (GINI) ===")
     
     # Model Decision Tree dengan Gini
     dt_model = DecisionTreeClassifier(
         criterion='gini',
-        max_depth=5,
+        max_depth=3,
         min_samples_split=10,
         min_samples_leaf=5,
         random_state=42
     )
     
     dt_model.fit(X_train, y_train)
-    print("Model Decision Tree berhasil dilatih!")
-    print(f"Parameter: criterion='gini', max_depth=5, min_samples_split=10, min_samples_leaf=5")
+    print("Model Decision Tree (Gini) berhasil dilatih!")
+    print(f"Parameter: criterion='gini', max_depth=3")
+    print()
+
+# === Fungsi untuk melatih model Decision Tree yang dioptimalkan (Entropy) ===
+def train_optimized_decision_tree():
+    """Melatih model Decision Tree yang dioptimalkan (Entropy)."""
+    global dt_model_optimized
+    
+    print("=== MELATIH MODEL DECISION TREE (OPTIMIZED) ===")
+    
+    # Model Decision Tree dengan Entropy
+    dt_model_optimized = DecisionTreeClassifier(
+        criterion='entropy',
+        max_depth=3,
+        min_samples_split=15,
+        min_samples_leaf=10,
+        random_state=42
+    )
+    
+    dt_model_optimized.fit(X_train, y_train)
+    print("Model Decision Tree (Optimized/Entropy) berhasil dilatih!")
+    print(f"Parameter: criterion='entropy', max_depth=3")
     print()
 
 # === Fungsi untuk melatih model SVM ===
@@ -166,14 +188,23 @@ def evaluate_all_models():
     print("=== EVALUASI SEMUA MODEL PADA DATA UJI ===")
     
     if dt_model is not None:
-        print("\n--- Decision Tree ---")
-        results_dt = evaluate_model(dt_model, 'Decision Tree', X_test, y_test)
+        print("\n--- Decision Tree (Gini) ---")
+        results_dt = evaluate_model(dt_model, 'Decision Tree (Gini)', X_test, y_test)
         print(f"Akurasi: {results_dt['accuracy']:.4f}")
         print(f"Precision: {results_dt['precision']:.4f}")
         print(f"Recall: {results_dt['recall']:.4f}")
         print(f"F1-Score: {results_dt['f1_score']:.4f}")
         print(f"CV Score (pada data latih): {results_dt['cv_mean']:.4f} (+/- {results_dt['cv_std']*2:.4f})")
     
+    if dt_model_optimized is not None:
+        print("\n--- Decision Tree (Optimized/Entropy) ---")
+        results_dt_opt = evaluate_model(dt_model_optimized, 'Decision Tree (Entropy)', X_test, y_test)
+        print(f"Akurasi: {results_dt_opt['accuracy']:.4f}")
+        print(f"Precision: {results_dt_opt['precision']:.4f}")
+        print(f"Recall: {results_dt_opt['recall']:.4f}")
+        print(f"F1-Score: {results_dt_opt['f1_score']:.4f}")
+        print(f"CV Score (pada data latih): {results_dt_opt['cv_mean']:.4f} (+/- {results_dt_opt['cv_std']*2:.4f})")
+
     if svm_model is not None:
         print("\n--- SVM ---")
         results_svm = evaluate_model(svm_model, 'SVM', X_scaled_test, y_test)
@@ -249,35 +280,6 @@ def show_confusion_matrices():
     plt.tight_layout()
     plt.show()
 
-# === Fungsi untuk menampilkan ROC Curve ===
-def show_roc_curves():
-    """Menampilkan ROC curve untuk semua model"""
-    
-    if not model_results:
-        print("Belum ada model yang dievaluasi!")
-        return
-    
-    print("=== ROC CURVE SEMUA MODEL ===")
-    
-    plt.figure(figsize=(10, 8))
-    
-    for model_name, results in model_results.items():
-        if results['y_pred_proba'] is not None:
-            fpr, tpr, _ = roc_curve(y_test, results['y_pred_proba'])
-            roc_auc = auc(fpr, tpr)
-            
-            plt.plot(fpr, tpr, label=f'{model_name} (AUC = {roc_auc:.3f})')
-    
-    plt.plot([0, 1], [0, 1], 'k--', label='Random Classifier')
-    plt.xlim([0.0, 1.0])
-    plt.ylim([0.0, 1.05])
-    plt.xlabel('False Positive Rate')
-    plt.ylabel('True Positive Rate')
-    plt.title('ROC Curve Comparison - Decision Tree vs SVM')
-    plt.legend()
-    plt.grid(True)
-    plt.show()
-
 # === Fungsi untuk menampilkan Precision-Recall Curve ===
 def show_precision_recall_curves():
     """Menampilkan Precision-Recall curve untuk semua model"""
@@ -332,11 +334,30 @@ def show_feature_importance():
 
 # === Fungsi untuk menampilkan visualisasi pohon keputusan ===
 def visualize_decision_tree():
-    """Menyimpan visualisasi Decision Tree sebagai gambar JPG."""
-    print("=== VISUALISASI DECISION TREE ===")
-    if dt_model is None:
-        print("Model Decision Tree belum dilatih!")
+    """Menyimpan visualisasi salah satu model Decision Tree sebagai gambar JPG."""
+    print("=== VISUALISASI POHON KEPUTUSAN ===")
+    
+    models_to_visualize = {}
+    if dt_model:
+        models_to_visualize['1'] = ("Default (Gini)", dt_model)
+    if dt_model_optimized:
+        models_to_visualize['2'] = ("Optimized (Entropy)", dt_model_optimized)
+
+    if not models_to_visualize:
+        print("Tidak ada model Decision Tree yang sudah dilatih!")
         return
+
+    print("Pilih model pohon keputusan yang ingin divisualisasikan:")
+    for key, (name, _) in models_to_visualize.items():
+        print(f"{key}. {name}")
+    
+    choice = input("Pilihan: ")
+    if choice not in models_to_visualize:
+        print("Pilihan tidak valid.")
+        return
+
+    model_name, selected_model = models_to_visualize[choice]
+    file_name = f"decision_tree_{model_name.split(' ')[0].lower()}.jpg"
     
     if pydotplus is None:
         print("❌ Library 'pydotplus' tidak ditemukan. Harap install terlebih dahulu.")
@@ -345,15 +366,15 @@ def visualize_decision_tree():
 
     try:
         dot_data = StringIO()
-        export_graphviz(dt_model, out_file=dot_data,
+        export_graphviz(selected_model, out_file=dot_data,
                         filled=True, rounded=True,
                         special_characters=True,
                         feature_names=feature_cols,
                         class_names=['Tidak Stroke', 'Stroke'])
         graph = pydotplus.graph_from_dot_data(dot_data.getvalue())
         # Mengubah output ke format JPG
-        graph.write_jpg('decision_tree.jpg')
-        print("✅ Visualisasi Decision Tree berhasil disimpan sebagai 'decision_tree.jpg'")
+        graph.write_jpg(file_name)
+        print(f"✅ Visualisasi Decision Tree berhasil disimpan sebagai '{file_name}'")
         print("   Anda bisa membuka file gambar tersebut di folder yang sama dengan skrip ini.")
     except Exception as e:
         print(f"❌ Error saat membuat visualisasi: {str(e)}")
@@ -382,17 +403,28 @@ def export_results_to_csv():
         print(f"❌ Gagal menyimpan perbandingan metrik: {e}")
 
     # 2. Ekspor prediksi Decision Tree
-    if 'Decision Tree' in model_results:
+    if 'Decision Tree (Gini)' in model_results:
         try:
             dt_results_df = X_test.copy()
             dt_results_df['actual_stroke'] = y_test.values
-            dt_results_df['predicted_stroke_dt'] = model_results['Decision Tree']['y_pred']
-            dt_results_df.to_csv('decision_tree_predictions.csv', index=False)
-            print("✅ Hasil prediksi Decision Tree disimpan ke 'decision_tree_predictions.csv'")
+            dt_results_df['predicted_stroke_dt_gini'] = model_results['Decision Tree (Gini)']['y_pred']
+            dt_results_df.to_csv('decision_tree_gini_predictions.csv', index=False)
+            print("✅ Hasil prediksi Decision Tree (Gini) disimpan ke 'decision_tree_gini_predictions.csv'")
         except Exception as e:
-            print(f"❌ Gagal menyimpan prediksi Decision Tree: {e}")
+            print(f"❌ Gagal menyimpan prediksi Decision Tree (Gini): {e}")
 
-    # 3. Ekspor prediksi SVM
+    # 3. Ekspor prediksi Decision Tree (Optimized)
+    if 'Decision Tree (Entropy)' in model_results:
+        try:
+            dt_opt_results_df = X_test.copy()
+            dt_opt_results_df['actual_stroke'] = y_test.values
+            dt_opt_results_df['predicted_stroke_dt_entropy'] = model_results['Decision Tree (Entropy)']['y_pred']
+            dt_opt_results_df.to_csv('decision_tree_entropy_predictions.csv', index=False)
+            print("✅ Hasil prediksi Decision Tree (Entropy) disimpan ke 'decision_tree_entropy_predictions.csv'")
+        except Exception as e:
+            print(f"❌ Gagal menyimpan prediksi Decision Tree (Entropy): {e}")
+
+    # 4. Ekspor prediksi SVM
     if 'SVM' in model_results:
         try:
             svm_results_df = X_test.copy()
@@ -413,16 +445,16 @@ def show_menu():
     print("                    PREDIKSI RISIKO STROKE")
     print("="*60)
     print("1. Muat dan Proses Dataset")
-    print("2. Latih Model Decision Tree")
-    print("3. Latih Model SVM")
-    print("4. Evaluasi Semua Model")
+    print("2. Latih Model Decision Tree (Gini)")
+    print("3. Latih Model Decision Tree (Entropy)")
+    print("4. Latih Model SVM")
+    print("5. Evaluasi Semua Model")
     print("--- VISUALISASI ---")
-    print("5. Tampilkan Perbandingan Metrik (Grafik)")
-    print("6. Tampilkan Confusion Matrix")
-    print("7. Tampilkan ROC Curve")
+    print("6. Tampilkan Perbandingan Metrik (Grafik)")
+    print("7. Tampilkan Confusion Matrix")
     print("8. Tampilkan Precision-Recall Curve")
-    print("9. Tampilkan Feature Importance")
-    print("10. Tampilkan Visualisasi Decision Tree (Gambar)")
+    print("9. Tampilkan Feature Importance (DT)")
+    print("10. Tampilkan Visualisasi Pohon Keputusan (Gambar)")
     print("--- EKSPOR & PREDIKSI ---")
     print("11. Ekspor Hasil ke CSV")
     print("12. Lakukan Prediksi")
@@ -475,35 +507,35 @@ def main():
             if X_train is None:
                 print("Harap muat dataset terlebih dahulu (menu 1)!")
             else:
-                train_svm()
+                train_optimized_decision_tree()
         elif choice == '4':
-            if not any([dt_model, svm_model]):
-                print("Harap latih model terlebih dahulu!")
+            if X_train is None:
+                print("Harap muat dataset terlebih dahulu (menu 1)!")
+            else:
+                train_svm()
+        elif choice == '5':
+            if not any([dt_model, svm_model, dt_model_optimized]):
+                print("Harap latih setidaknya satu model terlebih dahulu!")
             else:
                 evaluate_all_models()
-        elif choice == '5':
-            if not model_results:
-                print("Harap evaluasi model terlebih dahulu (menu 4)!")
-            else:
-                show_metrics_comparison()
         elif choice == '6':
             if not model_results:
-                print("Harap evaluasi model terlebih dahulu (menu 4)!")
+                print("Harap evaluasi model terlebih dahulu (menu 5)!")
             else:
-                show_confusion_matrices()
+                show_metrics_comparison()
         elif choice == '7':
             if not model_results:
-                print("Harap evaluasi model terlebih dahulu (menu 4)!")
+                print("Harap evaluasi model terlebih dahulu (menu 5)!")
             else:
-                show_roc_curves()
+                show_confusion_matrices()
         elif choice == '8':
             if not model_results:
-                print("Harap evaluasi model terlebih dahulu (menu 4)!")
+                print("Harap evaluasi model terlebih dahulu (menu 5)!")
             else:
                 show_precision_recall_curves()
         elif choice == '9':
-            if dt_model is None:
-                print("Harap latih Decision Tree terlebih dahulu!")
+            if not any([dt_model, dt_model_optimized]):
+                print("Harap latih model Decision Tree terlebih dahulu!")
             else:
                 show_feature_importance()
         elif choice == '10':
