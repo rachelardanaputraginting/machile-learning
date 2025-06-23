@@ -1,0 +1,123 @@
+# Contoh Input untuk Testing Program Perbandingan Model
+# File ini berisi contoh input yang bisa digunakan untuk testing
+
+## Contoh Data Pasien untuk Prediksi
+
+### Pasien 1 - Risiko Rendah
+Gender: 1 (Male)
+Age: 35
+Hypertension: 0 (No)
+Heart Disease: 0 (No)
+Ever Married: 1 (Yes)
+Work Type: 2 (Private)
+Residence Type: 1 (Urban)
+Average Glucose Level: 85.0
+BMI: 22.5
+Smoking Status: 0 (Never Smoked)
+
+### Pasien 2 - Risiko Tinggi
+Gender: 0 (Female)
+Age: 65
+Hypertension: 1 (Yes)
+Heart Disease: 1 (Yes)
+Ever Married: 1 (Yes)
+Work Type: 1 (Self-employed)
+Residence Type: 0 (Rural)
+Average Glucose Level: 180.0
+BMI: 28.5
+Smoking Status: 2 (Formerly Smoked)
+
+### Pasien 3 - Risiko Sedang
+Gender: 1 (Male)
+Age: 50
+Hypertension: 0 (No)
+Heart Disease: 0 (No)
+Ever Married: 1 (Yes)
+Work Type: 2 (Private)
+Residence Type: 1 (Urban)
+Average Glucose Level: 120.0
+BMI: 25.0
+Smoking Status: 1 (Smokes)
+
+## Mapping Kategorikal Values
+
+### Gender
+- 0: Female
+- 1: Male
+- 2: Other
+
+### Ever Married
+- 0: No
+- 1: Yes
+
+### Residence Type
+- 0: Rural
+- 1: Urban
+
+### Work Type
+- 0: Children
+- 1: Self-employed
+- 2: Private
+- 3: Never_worked
+- 4: Govt_job
+
+### Smoking Status
+- 0: Never Smoked
+- 1: Smokes
+- 2: Formerly Smoked
+- 3: Unknown
+
+## Alur Testing Program
+
+### Langkah 1: Muat Dataset
+Input: 1
+
+### Langkah 2: Latih Model
+Input: 2 (Decision Tree)
+Input: 3 (SVM)
+
+### Langkah 3: Evaluasi Model
+Input: 4
+
+### Langkah 4: Lihat Visualisasi
+Input: 5 (Perbandingan Metrik)
+Input: 6 (Confusion Matrix)
+Input: 7 (ROC Curve)
+Input: 8 (Precision-Recall Curve)
+Input: 9 (Feature Importance)
+
+### Langkah 5: Prediksi
+Input: 10
+Pilih model: 1 (Decision Tree) atau 2 (SVM)
+Input data pasien sesuai contoh di atas
+
+### Langkah 6: Keluar
+Input: 0
+
+## Tips Testing
+
+1. **Selalu mulai dengan menu 1** untuk memuat dataset
+2. **Latih kedua model** untuk perbandingan yang berarti
+3. **Evaluasi model** sebelum melihat visualisasi
+4. **Gunakan contoh data pasien** di atas untuk testing prediksi
+5. **Perhatikan output metrik** untuk memahami performa model
+6. **Cek visualisasi** untuk analisis yang lebih mendalam
+
+## Expected Output
+
+### Metrik Evaluasi (Contoh)
+- Decision Tree: Akurasi ~0.85-0.90
+- SVM: Akurasi ~0.88-0.92
+
+### Prediksi (Contoh)
+- Pasien 1: "Tidak Berisiko Stroke" (Confidence: 0.85+)
+- Pasien 2: "Berisiko Stroke" (Confidence: 0.70+)
+- Pasien 3: "Tidak Berisiko Stroke" (Confidence: 0.60+)
+
+## Troubleshooting
+
+### Jika ada error:
+1. Pastikan semua dependencies terinstall
+2. Pastikan dataset stroke.csv ada di folder dataset/
+3. Pastikan Python environment sudah benar
+4. Cek error message untuk informasi lebih detail 
